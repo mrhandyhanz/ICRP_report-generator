@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+
+# SQLite database
+*.db
+
+# Environment variables
+.env
+
+# Generated files
+uploads/
+reports/
