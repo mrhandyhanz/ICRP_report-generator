@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapReport — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+</head>
+
+<body>
+
+    <header class="app-header">
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='snapreport_logo.png') }}" alt="SnapReport" class="header-logo">
+            <span class="header-brand">Snap<span>Report</span></span>
+        </div>
+        <nav class="header-nav">
+            <a href="/dashboard" class="active">Dashboard</a>
+            <a href="/templates">Templates</a>
+            <a href="/reports">Reports</a>
+            <a href="/">Create New</a>
+        </nav>
+    </header>
+
+    <main class="app-main">
+
+        <div class="page-header">
+            <h1 class="page-title">Good morning <span>back</span></h1>
+            <p class="page-subtitle">Here's what's happening with your reports. Manage templates, upload data, and generate professional reports.</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📋</div>
+                <div class="stat-value">{{ stats['template_count'] }}</div>
+                <div class="stat-label">Templates</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-value">{{ stats['field_count'] }}</div>
+                <div class="stat-label">Total Fields</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📄</div>
+                <div class="stat-value">{{ stats['report_count'] }}</div>
+                <div class="stat-label">Reports Generated</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="/" class="action-card">
+                <div class="action-icon">📝</div>
+                <div class="action-label">Create Template</div>
+            </a>
+            <a href="/templates" class="action-card">
+                <div class="action-icon">📋</div>
+                <div class="action-label">View Templates</div>
+            </a>
+            <a href="/reports" class="action-card">
+                <div class="action-icon">📊</div>
+                <div class="action-label">View Reports</div>
+            </a>
+        </div>
+
+        <!-- Recent Reports -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Recent Reports</h3>
+                <a href="/reports" class="btn btn-ghost btn-sm">View All →</a>
+            </div>
+
+            {% if stats['recent_reports'] %}
+                <div class="table-wrapper" style="border: none; box-shadow: none;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Report</th>
+                                <th>Source</th>
+                                <th>Students</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in stats['recent_reports'] %}
+                            <tr>
+                                <td>
+                                    <strong>{{ r['template_name'] }}</strong>
+                                </td>
+                                <td class="text-muted">{{ r['filename'] }}</td>
+                                <td>
+                                    <span class="badge badge-primary">{{ r['student_count'] }} students</span>
+                                </td>
+                                <td class="text-muted">{{ r['created_at'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state" style="padding: var(--space-10) var(--space-6);">
+                    <div class="empty-state-icon">📄</div>
+                    <h3>No reports yet</h3>
+                    <p>Upload an Excel file to generate your first report.</p>
+                    <a href="/templates" class="btn btn-primary">Get Started →</a>
+                </div>
+            {% endif %}
+        </div>
+
+    </main>
+
+    <footer class="app-footer">
+        SnapReport · Capture. Report. Insight. Action.
+        <br>
+        &copy; 2026 · Developed by <strong>Omihan Tech</strong>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+</body>
+</html>

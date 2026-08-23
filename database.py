@@ -1,13 +1,14 @@
 # ============================================================
 # DATABASE MODULE
-# ICRP Report Generator
+# SnapReport
 # ============================================================
 
 # sqlite3 is Python's built-in library for working with
 # SQLite databases.
 import sqlite3
 
-# Path helps us create file paths in a reliable way.
+
+# Path helps us create reliable file paths.
 from pathlib import Path
 
 
@@ -17,14 +18,13 @@ from pathlib import Path
 
 # Get the directory where this database.py file is located.
 #
-# This means our database will stay inside the project folder,
-# regardless of where we run the application from.
+# This ensures that the database stays inside the project folder.
 BASE_DIR = Path(__file__).resolve().parent
 
 
-# Name and location of our SQLite database.
+# Path to our SQLite database.
 #
-# This creates:
+# The database will be:
 #
 # ICRP_report-generator/
 # └── icrp.db
@@ -39,18 +39,12 @@ DATABASE = BASE_DIR / "icrp.db"
 def get_db_connection():
     """
     Create and return a connection to the SQLite database.
-
-    Other parts of our application will call this function
-    whenever they need to read from or write to the database.
     """
 
     # Open the SQLite database.
     connection = sqlite3.connect(DATABASE)
 
-    # Normally SQLite returns rows as tuples.
-    #
-    # sqlite3.Row allows us to access database values using
-    # column names.
+    # Allow us to access database columns by name.
     #
     # Example:
     #
@@ -61,13 +55,12 @@ def get_db_connection():
     # template[1]
     connection.row_factory = sqlite3.Row
 
-    # Enable SQLite foreign-key enforcement.
+    # Enable foreign-key support.
     #
-    # This is important because report_fields is connected
-    # to report_templates using a foreign key.
+    # This allows report_fields to properly reference
+    # report_templates.
     connection.execute("PRAGMA foreign_keys = ON")
 
-    # Return the connection to the function that requested it.
     return connection
 
 
@@ -77,16 +70,11 @@ def get_db_connection():
 
 def initialize_database():
     """
-    Create the tables required by the application.
+    Create all required database tables.
 
-    CREATE TABLE IF NOT EXISTS means that the table will only
-    be created if it does not already exist.
-
-    Therefore, running this function again will not erase
-    existing data.
+    If the tables already exist, SQLite leaves them unchanged.
     """
 
-    # Open a connection to the database.
     connection = get_db_connection()
 
 
@@ -94,13 +82,13 @@ def initialize_database():
     # REPORT TEMPLATES TABLE
     # ========================================================
     #
-    # This table stores the general information about a report.
+    # Stores the general information about a report.
     #
     # Example:
     #
-    # Name:          ICRP Standard Report
-    # School:        Netzah International School
-    # Academic Year: 2026
+    # Report Type:   ICRP Report
+    # School:        Mengo Senior School
+    # Year:          2026
     # Term:          Term 1
     #
 
@@ -108,19 +96,19 @@ def initialize_database():
         CREATE TABLE IF NOT EXISTS report_templates (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
 
-            -- Name given to the report template.
+            -- Name/type of the report.
             name TEXT NOT NULL,
 
-            -- School or organization using the report.
+            -- School using the report.
             school_name TEXT,
 
-            -- Academic year of the report.
+            -- Academic year.
             academic_year TEXT,
 
-            -- Term or semester being reported.
+            -- Term or semester.
             term TEXT,
 
-            -- Automatically records when the template was created.
+            -- Date and time the template was created.
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -130,16 +118,15 @@ def initialize_database():
     # REPORT FIELDS TABLE
     # ========================================================
     #
-    # This table stores the individual fields that belong
-    # to each report template.
+    # Stores the individual fields belonging to a template.
     #
-    # Example fields:
+    # Examples:
     #
     # Student Name
     # Registration Number
+    # Gender
     # Online Assessment
-    # Physical Assessment
-    # Attendance
+    # Physical Exam
     # Teacher Comment
     #
 
@@ -147,18 +134,72 @@ def initialize_database():
         CREATE TABLE IF NOT EXISTS report_fields (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
 
+            -- ID of the report template this field belongs to.
             template_id INTEGER NOT NULL,
 
+            -- Name displayed by SnapReport.
             field_name TEXT NOT NULL,
 
+            -- Matching column name in the Excel file.
             excel_column TEXT NOT NULL,
 
+            -- Type of information stored in this field.
             field_type TEXT NOT NULL DEFAULT 'text',
 
+            -- Whether this field must exist in the Excel file.
+            -- SQLite stores False as 0 and True as 1.
             required INTEGER NOT NULL DEFAULT 0,
 
+            -- Whether this field participates in grading.
             include_in_grading INTEGER NOT NULL DEFAULT 0,
 
+            -- Controls the order in which fields appear.
+            display_order INTEGER NOT NULL DEFAULT 0,
+
+            -- Connect this field to its report template.
+            --
+            -- ON DELETE CASCADE means that if a template
+            -- is deleted, its fields can also be deleted.
+            FOREIGN KEY (template_id)
+                REFERENCES report_templates(id)
+                ON DELETE CASCADE
+        )
+    """)
+
+
+    # ========================================================
+    # GRADE BOUNDARIES TABLE
+    # ========================================================
+    #
+    # Stores configurable grading rules for each template.
+    #
+    # Example:
+    #
+    # 80 - 100  -> A  -> Excellent
+    # 70 - 79   -> B  -> Very Good
+    # 60 - 69   -> C  -> Good
+    #
+
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS grade_boundaries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            -- Which template this grading rule belongs to.
+            template_id INTEGER NOT NULL,
+
+            -- Minimum score for this grade (inclusive).
+            min_score REAL NOT NULL,
+
+            -- Maximum score for this grade (inclusive).
+            max_score REAL NOT NULL,
+
+            -- The grade label (e.g. A+, A, B).
+            grade TEXT NOT NULL,
+
+            -- Description of this grade (e.g. Excellent).
+            remark TEXT NOT NULL DEFAULT '',
+
+            -- Controls display order in the UI.
             display_order INTEGER NOT NULL DEFAULT 0,
 
             FOREIGN KEY (template_id)
@@ -168,10 +209,60 @@ def initialize_database():
     """)
 
 
-    # Save all database changes.
+    # ========================================================
+    # GENERATED REPORTS TABLE
+    # ========================================================
+    #
+    # Tracks each time a report is generated from a template.
+    #
+    # Example:
+    #
+    # Template 5  ->  Uploaded  ->  24 students  ->  Generated
+    #
+
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS generated_reports (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            -- Which template was used.
+            template_id INTEGER NOT NULL,
+
+            -- Original filename uploaded by the user.
+            filename TEXT NOT NULL,
+
+            -- Number of students processed.
+            student_count INTEGER NOT NULL DEFAULT 0,
+
+            -- Path to the generated PDF.
+            pdf_path TEXT,
+
+            -- JSON string of processed student data.
+            processed_data TEXT,
+
+            -- When this report was generated.
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY (template_id)
+                REFERENCES report_templates(id)
+                ON DELETE CASCADE
+        )
+    """)
+
+
+    # Add processed_data column if missing (migration).
+    try:
+        connection.execute(
+            "ALTER TABLE generated_reports ADD COLUMN processed_data TEXT"
+        )
+        connection.commit()
+    except Exception:
+        pass  # Column already exists.
+
+
+    # Save database changes.
     connection.commit()
 
-    # Close the connection because we are finished with it.
+    # Close the connection.
     connection.close()
 
 
@@ -179,30 +270,29 @@ def initialize_database():
 # CREATE REPORT TEMPLATE
 # ============================================================
 
-def create_report_template(name, school_name, academic_year, term):
+def create_report_template(
+    name,
+    school_name,
+    academic_year,
+    term
+):
     """
     Create a new report template.
 
-    Example:
-
-        create_report_template(
-            "ICRP Standard Report",
-            "Netzah International School",
-            "2026",
-            "Term 1"
-        )
+    Returns:
+        The ID of the newly-created template.
     """
 
-    # Connect to the database.
     connection = get_db_connection()
 
-    # Insert the new template into the report_templates table.
-    #
-    # The ? symbols are parameterized SQL placeholders.
-    # This is safer than inserting values directly into SQL.
     cursor = connection.execute("""
         INSERT INTO report_templates
-        (name, school_name, academic_year, term)
+        (
+            name,
+            school_name,
+            academic_year,
+            term
+        )
         VALUES (?, ?, ?, ?)
     """, (
         name,
@@ -211,18 +301,13 @@ def create_report_template(name, school_name, academic_year, term):
         term
     ))
 
-    # Save the new record.
     connection.commit()
 
-    # SQLite automatically creates an ID for the new template.
-    #
-    # cursor.lastrowid gives us that ID.
+    # Get SQLite's automatically generated ID.
     template_id = cursor.lastrowid
 
-    # Close the database connection.
     connection.close()
 
-    # Return the newly created template ID.
     return template_id
 
 
@@ -233,30 +318,55 @@ def create_report_template(name, school_name, academic_year, term):
 def get_report_template(template_id):
     """
     Retrieve one report template using its ID.
-
-    Example:
-
-        get_report_template(1)
-
-    retrieves the template whose ID is 1.
     """
 
-    # Connect to the database.
     connection = get_db_connection()
 
-    # Search for the requested template.
     template = connection.execute("""
         SELECT *
         FROM report_templates
         WHERE id = ?
     """, (template_id,)).fetchone()
 
-    # Close the connection.
     connection.close()
 
-    # Return the template.
     return template
 
+# ============================================================
+# GET ALL REPORT TEMPLATES
+# ============================================================
+
+def get_all_templates():
+    """
+    Retrieve all report templates with a count
+    of how many fields each one has.
+
+    Returns a list of rows, each containing:
+        id, name, school_name, academic_year,
+        term, created_at, field_count
+    """
+
+    connection = get_db_connection()
+
+    templates = connection.execute("""
+        SELECT
+            t.id,
+            t.name,
+            t.school_name,
+            t.academic_year,
+            t.term,
+            t.created_at,
+            COUNT(f.id) as field_count
+        FROM report_templates t
+        LEFT JOIN report_fields f
+            ON f.template_id = t.id
+        GROUP BY t.id
+        ORDER BY t.created_at DESC
+    """).fetchall()
+
+    connection.close()
+
+    return templates
 
 # ============================================================
 # ADD REPORT FIELD
@@ -274,14 +384,12 @@ def add_report_field(
     """
     Add a new field to an existing report template.
 
-    This will eventually power the [+ Add Field] button
-    in our web interface.
+    Returns:
+        The ID of the newly-created field.
     """
 
-    # Connect to the database.
     connection = get_db_connection()
 
-    # Insert the new field.
     cursor = connection.execute("""
         INSERT INTO report_fields
         (
@@ -300,44 +408,37 @@ def add_report_field(
         excel_column,
         field_type,
 
-        # SQLite stores Boolean values as 0 or 1.
-        # False becomes 0 and True becomes 1.
+        # Convert Python Boolean to SQLite 0/1.
         int(required),
 
-        # Same conversion for grading participation.
+        # Convert Python Boolean to SQLite 0/1.
         int(include_in_grading),
 
         display_order
     ))
 
-    # Save the new field.
     connection.commit()
 
-    # Get the ID automatically generated for this field.
     field_id = cursor.lastrowid
 
-    # Close the connection.
     connection.close()
 
-    # Return the new field ID.
     return field_id
 
 
 # ============================================================
-# GET REPORT FIELDS
+# GET ALL REPORT FIELDS
 # ============================================================
 
 def get_report_fields(template_id):
     """
-    Retrieve all fields belonging to a specific report template.
+    Retrieve all fields belonging to a specific template.
 
-    The fields are returned according to their display_order.
+    Fields are ordered by display_order.
     """
 
-    # Connect to the database.
     connection = get_db_connection()
 
-    # Retrieve all fields belonging to this template.
     fields = connection.execute("""
         SELECT *
         FROM report_fields
@@ -345,11 +446,33 @@ def get_report_fields(template_id):
         ORDER BY display_order ASC, id ASC
     """, (template_id,)).fetchall()
 
-    # Close the connection.
     connection.close()
 
-    # Return the fields.
     return fields
+
+
+# ============================================================
+# GET ONE REPORT FIELD
+# ============================================================
+
+def get_report_field(field_id):
+    """
+    Retrieve one report field using its ID.
+
+    This is mainly used when editing an existing field.
+    """
+
+    connection = get_db_connection()
+
+    field = connection.execute("""
+        SELECT *
+        FROM report_fields
+        WHERE id = ?
+    """, (field_id,)).fetchone()
+
+    connection.close()
+
+    return field
 
 
 # ============================================================
@@ -367,15 +490,10 @@ def update_report_field(
 ):
     """
     Update an existing report field.
-
-    This will eventually power an [Edit] button in the
-    report configuration interface.
     """
 
-    # Connect to the database.
     connection = get_db_connection()
 
-    # Update the field whose ID matches field_id.
     connection.execute("""
         UPDATE report_fields
         SET
@@ -391,22 +509,20 @@ def update_report_field(
         excel_column,
         field_type,
 
-        # Convert True/False to SQLite's 1/0.
+        # Convert Boolean to SQLite 0/1.
         int(required),
 
-        # Convert True/False to SQLite's 1/0.
+        # Convert Boolean to SQLite 0/1.
         int(include_in_grading),
 
         display_order,
 
-        # Identify the field that should be updated.
+        # Identify the field to update.
         field_id
     ))
 
-    # Save the changes.
     connection.commit()
 
-    # Close the connection.
     connection.close()
 
 
@@ -416,17 +532,16 @@ def update_report_field(
 
 def delete_report_field(field_id):
     """
-    Delete one field from a report template.
+    Delete one report field from the database.
 
-    This will eventually power the [Delete] button in the
-    report configuration interface.
+    Returns:
+        True if a field was deleted.
+        False if no field with that ID existed.
     """
 
-    # Connect to the database.
     connection = get_db_connection()
 
-    # Delete the field whose ID matches field_id.
-    connection.execute("""
+    cursor = connection.execute("""
         DELETE FROM report_fields
         WHERE id = ?
     """, (field_id,))
@@ -434,36 +549,286 @@ def delete_report_field(field_id):
     # Save the deletion.
     connection.commit()
 
-    # Close the connection.
+    # rowcount tells us whether SQLite actually deleted
+    # a record.
+    deleted = cursor.rowcount > 0
+
+    connection.close()
+
+    return deleted
+# ============================================================
+# DELETE REPORT TEMPLATE
+# ============================================================
+
+def delete_report_template(template_id):
+    """
+    Delete one report template and all its fields.
+
+    The ON DELETE CASCADE constraint on report_fields
+    means deleting the template automatically removes
+    its fields too.
+
+    Returns:
+        True if a template was deleted.
+        False if no template with that ID existed.
+    """
+
+    connection = get_db_connection()
+
+    cursor = connection.execute("""
+        DELETE FROM report_templates
+        WHERE id = ?
+    """, (template_id,))
+
+    connection.commit()
+
+    deleted = cursor.rowcount > 0
+
+    connection.close()
+
+    return deleted
+
+# ============================================================
+# GRADE BOUNDARIES — GET ALL
+# ============================================================
+
+def get_grade_boundaries(template_id):
+    """
+    Retrieve all grade boundaries for a template,
+    ordered from highest score to lowest.
+    """
+
+    connection = get_db_connection()
+
+    boundaries = connection.execute("""
+        SELECT *
+        FROM grade_boundaries
+        WHERE template_id = ?
+        ORDER BY min_score DESC
+    """, (template_id,)).fetchall()
+
+    connection.close()
+
+    return boundaries
+
+
+# ============================================================
+# GRADE BOUNDARIES — SAVE ALL
+# ============================================================
+
+def save_grade_boundaries(template_id, boundaries):
+    """
+    Replace all grade boundaries for a template.
+
+    This deletes existing boundaries and inserts new ones.
+    """
+
+    connection = get_db_connection()
+
+    # Delete existing boundaries for this template.
+    connection.execute("""
+        DELETE FROM grade_boundaries
+        WHERE template_id = ?
+    """, (template_id,))
+
+    # Insert new boundaries.
+    for i, b in enumerate(boundaries):
+        connection.execute("""
+            INSERT INTO grade_boundaries
+            (
+                template_id,
+                min_score,
+                max_score,
+                grade,
+                remark,
+                display_order
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            template_id,
+            b['min_score'],
+            b['max_score'],
+            b['grade'],
+            b['remark'],
+            i
+        ))
+
+    connection.commit()
     connection.close()
 
 
 # ============================================================
-# TEMPORARY DEVELOPMENT TEST
+# GRADE LOOKUP — APPLY BOUNDARIES
+# ============================================================
+
+def apply_grading(template_id, score):
+    """
+    Look up the grade for a given score using
+    the template's grade boundaries.
+
+    Returns a tuple: (grade, remark)
+    Falls back to 'N/A' if no boundaries exist.
+    """
+
+    boundaries = get_grade_boundaries(template_id)
+
+    if not boundaries:
+        return ('N/A', 'No grading configured')
+
+    for b in boundaries:
+        if b['min_score'] <= score <= b['max_score']:
+            return (b['grade'], b['remark'])
+
+    return ('N/A', 'Score out of range')
+
+
+# ============================================================
+# GENERATED REPORTS — CREATE
+# ============================================================
+
+def create_generated_report(
+    template_id,
+    filename,
+    student_count,
+    pdf_path=None,
+    processed_data=None
+):
+    """
+    Record a newly generated report.
+    """
+
+    connection = get_db_connection()
+
+    cursor = connection.execute("""
+        INSERT INTO generated_reports
+        (
+            template_id,
+            filename,
+            student_count,
+            pdf_path,
+            processed_data
+        )
+        VALUES (?, ?, ?, ?, ?)
+    """, (
+        template_id,
+        filename,
+        student_count,
+        pdf_path,
+        processed_data
+    ))
+
+    connection.commit()
+
+    report_id = cursor.lastrowid
+
+    connection.close()
+
+    return report_id
+
+
+# ============================================================
+# GENERATED REPORTS — GET ALL
+# ============================================================
+
+def get_generated_reports(template_id=None):
+    """
+    Retrieve generated reports.
+
+    If template_id is given, filter by that template.
+    Otherwise return all reports.
+    """
+
+    connection = get_db_connection()
+
+    if template_id:
+        reports = connection.execute("""
+            SELECT r.*, t.name as template_name,
+                   t.school_name
+            FROM generated_reports r
+            JOIN report_templates t
+                ON t.id = r.template_id
+            WHERE r.template_id = ?
+            ORDER BY r.created_at DESC
+        """, (template_id,)).fetchall()
+    else:
+        reports = connection.execute("""
+            SELECT r.*, t.name as template_name,
+                   t.school_name
+            FROM generated_reports r
+            JOIN report_templates t
+                ON t.id = r.template_id
+            ORDER BY r.created_at DESC
+            LIMIT 20
+        """).fetchall()
+
+    connection.close()
+
+    return reports
+
+
+# ============================================================
+# DASHBOARD STATS
+# ============================================================
+
+def get_dashboard_stats():
+    """
+    Get summary statistics for the dashboard.
+    """
+
+    connection = get_db_connection()
+
+    template_count = connection.execute(
+        'SELECT COUNT(*) FROM report_templates'
+    ).fetchone()[0]
+
+    field_count = connection.execute(
+        'SELECT COUNT(*) FROM report_fields'
+    ).fetchone()[0]
+
+    report_count = connection.execute(
+        'SELECT COUNT(*) FROM generated_reports'
+    ).fetchone()[0]
+
+    recent_reports = connection.execute("""
+        SELECT r.*, t.name as template_name,
+               t.school_name
+        FROM generated_reports r
+        JOIN report_templates t
+            ON t.id = r.template_id
+        ORDER BY r.created_at DESC
+        LIMIT 5
+    """).fetchall()
+
+    connection.close()
+
+    return {
+        'template_count': template_count,
+        'field_count': field_count,
+        'report_count': report_count,
+        'recent_reports': recent_reports
+    }
+
+
+# ============================================================
+# DEVELOPMENT TESTING
 # ============================================================
 #
-# This section is ONLY for testing our database functions
-# while we are developing.
-#
-# Later, we will remove this section and the Flask application
-# will use the functions above.
-#
-# This code runs only when we execute:
+# This section runs ONLY when we execute:
 #
 #     python database.py
 #
-# It does NOT run when app.py imports database.py.
+# It does NOT run when app.py imports this module.
 #
 
 if __name__ == "__main__":
 
-    # Make sure the database tables exist.
+    # Create the database tables if they don't exist.
     initialize_database()
 
     print("Database initialized successfully.")
 
     # --------------------------------------------------------
-    # CREATE A TEST REPORT TEMPLATE
+    # CREATE TEST TEMPLATE
     # --------------------------------------------------------
 
     template_id = create_report_template(
@@ -477,15 +842,10 @@ if __name__ == "__main__":
 
 
     # --------------------------------------------------------
-    # ADD TEST FIELDS
+    # ADD TEST FIELD 1
     # --------------------------------------------------------
 
-    # Student Name:
-    # - Text field
-    # - Required
-    # - Does not participate in grading
-    # - Appears first
-    add_report_field(
+    student_name_id = add_report_field(
         template_id,
         "Student Name",
         "NAME",
@@ -495,13 +855,14 @@ if __name__ == "__main__":
         1
     )
 
+    print("Created Student Name field:", student_name_id)
 
-    # Online Assessment:
-    # - Score field
-    # - Required
-    # - Participates in grading
-    # - Appears second
-    add_report_field(
+
+    # --------------------------------------------------------
+    # ADD TEST FIELD 2
+    # --------------------------------------------------------
+
+    online_id = add_report_field(
         template_id,
         "Online Assessment",
         "ONLINE",
@@ -511,13 +872,14 @@ if __name__ == "__main__":
         2
     )
 
+    print("Created Online Assessment field:", online_id)
 
-    # Teacher Comment:
-    # - Long text field
-    # - Not required
-    # - Does not participate in grading
-    # - Appears third
-    add_report_field(
+
+    # --------------------------------------------------------
+    # ADD TEST FIELD 3
+    # --------------------------------------------------------
+
+    comment_id = add_report_field(
         template_id,
         "Teacher Comment",
         "COMMENT",
@@ -527,9 +889,11 @@ if __name__ == "__main__":
         3
     )
 
+    print("Created Teacher Comment field:", comment_id)
+
 
     # --------------------------------------------------------
-    # RETRIEVE THE TEMPLATE
+    # DISPLAY TEMPLATE
     # --------------------------------------------------------
 
     template = get_report_template(template_id)
@@ -539,7 +903,7 @@ if __name__ == "__main__":
 
 
     # --------------------------------------------------------
-    # RETRIEVE THE FIELDS
+    # DISPLAY FIELDS
     # --------------------------------------------------------
 
     fields = get_report_fields(template_id)

@@ -2,492 +2,218 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SnapReport — Configure Report</title>
-
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap"
-        rel="stylesheet"
-    >
-
-
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='css/configure.css') }}"
-    >
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+    <style>
+        /* Configure-specific styles */
+        .fields-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .fields-table th {
+            padding: var(--space-3) var(--space-4);
+            font-size: var(--text-xs);
+            font-weight: var(--weight-semibold);
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: left;
+            background: var(--color-surface-hover);
+            border-bottom: 1px solid var(--color-border);
+        }
+        .fields-table td {
+            padding: var(--space-3) var(--space-4);
+            font-size: var(--text-sm);
+            border-bottom: 1px solid var(--color-border-light);
+            vertical-align: middle;
+        }
+        .fields-table tr:last-child td { border-bottom: none; }
+        .fields-table tr:hover td { background: var(--color-surface-hover); }
+        .field-name { font-weight: var(--weight-semibold); }
+        .excel-col { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-primary); }
+        .field-type-badge { font-size: var(--text-xs); color: var(--color-text-muted); }
+        .actions-cell { display: flex; gap: var(--space-2); }
+    </style>
 </head>
-
 
 <body data-template-id="{{ template['id'] }}">
 
+    <header class="app-header">
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='snapreport_logo.png') }}" alt="SnapReport" class="header-logo">
+            <span class="header-brand">Snap<span>Report</span></span>
+        </div>
+        <nav class="header-nav">
+            <a href="/templates">← Templates</a>
+            <a href="/configure/{{ template['id'] }}/grading">Grading</a>
+            <a href="/configure/{{ template['id'] }}/upload">Upload</a>
+        </nav>
+    </header>
 
-<header>
+    <main class="app-main">
 
-    <div class="brand">
-
-        <img
-            src="{{ url_for('static', filename='icrp_logo.png') }}"
-            alt="SnapReport"
-        >
-
-        <div class="brand-name">
-            SnapReport
+        <div class="page-header">
+            <h1 class="page-title">Configure your <span>report</span></h1>
+            <p class="page-subtitle">Define information that will come from the Excel file.</p>
         </div>
 
-    </div>
-
-
-    <a
-        href="/"
-        class="back-button"
-    >
-        ← Back
-    </a>
-
-</header>
-
-
-<main>
-
-    <div class="page-heading">
-
-        <h1>
-            Configure your report
-        </h1>
-
-        <p>
-            Define the information that SnapReport should
-            expect from your Excel file and display in the
-            generated student reports.
-        </p>
-
-    </div>
-
-
-    <div class="template-info">
-
-        <div class="info-item">
-
-            <span>
-                Report Type
-            </span>
-
-            <strong>
-                {{ template['name'] }}
-            </strong>
-
+        <div class="info-bar">
+            <div class="info-item">
+                <span class="info-label">Report Type</span>
+                <span class="info-value">{{ template['name'] }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">School</span>
+                <span class="info-value">{{ template['school_name'] }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Academic Year</span>
+                <span class="info-value">{{ template['academic_year'] }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Term</span>
+                <span class="info-value">{{ template['term'] }}</span>
+            </div>
         </div>
 
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Report Fields</h3>
+                <button class="btn btn-primary btn-sm" onclick="openAddField()">+ Add Field</button>
+            </div>
 
-        <div class="info-item">
-
-            <span>
-                School
-            </span>
-
-            <strong>
-                {{ template['school_name'] }}
-            </strong>
-
-        </div>
-
-
-        <div class="info-item">
-
-            <span>
-                Academic Year
-            </span>
-
-            <strong>
-                {{ template['academic_year'] }}
-            </strong>
-
-        </div>
-
-
-        <div class="info-item">
-
-            <span>
-                Term
-            </span>
-
-            <strong>
-                {{ template['term'] }}
-            </strong>
-
-        </div>
-
-    </div>
-
-
-    <div class="section-header">
-
-        <div>
-
-            <h2>
-                Report Fields
-            </h2>
-
-        </div>
-
-
-        <button
-            class="add-field-button"
-            onclick="openAddField()"
-        >
-            + Add Field
-        </button>
-
-    </div>
-
-
-    <div class="fields-card">
-
-        <div class="field-row field-header">
-
-            <div>#</div>
-
-            <div>Field Name</div>
-
-            <div>Excel Column</div>
-
-            <div>Type</div>
-
-            <div>Grading</div>
-
-            <div>Actions</div>
-
-        </div>
-
-
-        {% if fields %}
-
-            {% for field in fields %}
-
-            <div class="field-row">
-
-                <div>
-                    {{ loop.index }}
+            {% if fields %}
+                <div class="table-wrapper" style="border: none; box-shadow: none;">
+                    <table class="fields-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">#</th>
+                                <th>Field Name</th>
+                                <th>Excel Column</th>
+                                <th>Type</th>
+                                <th>Grading</th>
+                                <th style="width: 140px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for field in fields %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td class="field-name">{{ field['field_name'] }}</td>
+                                <td class="excel-col">{{ field['excel_column'] }}</td>
+                                <td class="field-type-badge">{{ field['field_type'] }}</td>
+                                <td>
+                                    {% if field['include_in_grading'] %}
+                                        <span class="badge badge-success">Included</span>
+                                    {% else %}
+                                        <span class="badge badge-neutral">No</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="actions-cell">
+                                        <button class="btn btn-ghost btn-sm" onclick="editField({{ field['id'] }})">Edit</button>
+                                        <button class="btn btn-ghost btn-sm" style="color: var(--color-error);" onclick="deleteField({{ field['id'] }})">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-
-
-                <div class="field-name">
-
-                    {{ field['field_name'] }}
-
+            {% else %}
+                <div class="empty-state" style="padding: var(--space-10);">
+                    <div class="empty-state-icon">📊</div>
+                    <h3>No fields configured</h3>
+                    <p>Add the fields that should appear in your student reports.</p>
+                    <button class="btn btn-primary" onclick="openAddField()">+ Add First Field</button>
                 </div>
+            {% endif %}
+        </div>
 
+        <div style="display: flex; justify-content: flex-end; margin-top: var(--space-6);">
+            <a href="/configure/{{ template['id'] }}/grading" class="btn btn-primary btn-lg">Continue to Grading →</a>
+        </div>
 
-                <div class="excel-column">
+    </main>
 
-                    {{ field['excel_column'] }}
+    <footer class="app-footer">
+        SnapReport · Capture. Report. Insight. Action.
+        <br>
+        &copy; 2026 · Developed by <strong>Omihan Tech</strong>
+    </footer>
 
-                </div>
+    <!-- =========================================================
+         ADD/EDIT FIELD MODAL
+         ========================================================= -->
+    <div id="fieldModal" class="modal-backdrop">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add Report Field</h3>
+                <button class="modal-close" onclick="closeFieldModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="fieldForm">
+                    <input type="hidden" id="fieldId">
 
+                    <div class="form-group">
+                        <label class="form-label" for="fieldName">Field Name <span class="required">*</span></label>
+                        <input type="text" id="fieldName" class="form-input" placeholder="e.g. Student Name" required>
+                        <span class="form-hint">The name that will appear on the report.</span>
+                    </div>
 
-                <div class="field-type">
+                    <div class="form-group">
+                        <label class="form-label" for="excelColumn">Excel Column <span class="required">*</span></label>
+                        <input type="text" id="excelColumn" class="form-input" placeholder="e.g. NAME" required>
+                        <span class="form-hint">The column heading in the uploaded Excel file.</span>
+                    </div>
 
-                    {{ field['field_type'] }}
+                    <div class="form-group">
+                        <label class="form-label" for="fieldType">Field Type</label>
+                        <select id="fieldType" class="form-select">
+                            <option value="text">Text</option>
+                            <option value="score">Score</option>
+                            <option value="long_text">Long Text / Comment</option>
+                            <option value="number">Number</option>
+                            <option value="date">Date</option>
+                        </select>
+                    </div>
 
-                </div>
-
-
-                <div>
-
-                    {% if field['include_in_grading'] %}
-
-                        <span class="badge yes">
-                            Included
+                    <label class="form-checkbox">
+                        <input type="checkbox" id="fieldRequired">
+                        <span class="checkbox-label">
+                            Required field
+                            <span class="checkbox-hint">The Excel file must contain this information.</span>
                         </span>
+                    </label>
 
-                    {% else %}
-
-                        <span class="badge no">
-                            No
+                    <label class="form-checkbox" style="margin-top: var(--space-3);">
+                        <input type="checkbox" id="fieldGrading">
+                        <span class="checkbox-label">
+                            Include in grading
+                            <span class="checkbox-hint">This field will contribute to the student's grade.</span>
                         </span>
+                    </label>
 
-                    {% endif %}
-
-                </div>
-
-
-                <div class="actions">
-
-                    <button
-                        class="action-button"
-                        onclick="editField({{ field['id'] }})"
-                    >
-                        Edit
-                    </button>
-
-
-                    <button
-                        class="action-button delete-button"
-                        onclick="deleteField({{ field['id'] }})"
-                    >
-                        Delete
-                    </button>
-
-                </div>
-
+                    <div class="form-group" style="margin-top: var(--space-4);">
+                        <label class="form-label" for="displayOrder">Display Order</label>
+                        <input type="number" id="displayOrder" class="form-input" value="1" min="1" style="max-width: 120px;">
+                    </div>
+                </form>
             </div>
-
-            {% endfor %}
-
-        {% else %}
-
-            <div class="empty-state">
-
-                <h3>
-                    No fields configured
-                </h3>
-
-                <p>
-                    Add the fields that should appear
-                    in your student reports.
-                </p>
-
-
-                <button
-                    class="add-field-button"
-                    onclick="openAddField()"
-                >
-                    + Add First Field
-                </button>
-
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeFieldModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="document.getElementById('fieldForm').requestSubmit()">Save Field</button>
             </div>
-
-        {% endif %}
-
-    </div>
-
-
-    <div class="continue-section">
-
-        <button
-            class="continue-button"
-            onclick="continueToGrading()"
-        >
-            Continue to Grading →
-        </button>
-
-    </div>
-
-</main>
-
-
-<!-- =========================================================
-     ADD FIELD MODAL
-     ========================================================= -->
-
-<div
-    id="fieldModal"
-    class="modal-overlay"
->
-
-    <div class="modal">
-
-        <div class="modal-header">
-
-            <div>
-
-                <h2>
-                    Add Report Field
-                </h2>
-
-                <p>
-                    Define information that will come
-                    from the Excel file.
-                </p>
-
-            </div>
-
-
-            <button
-                class="modal-close"
-                onclick="closeFieldModal()"
-            >
-                ×
-            </button>
-
         </div>
-
-
-        <form id="fieldForm">
-
-
-            <div class="form-group">
-
-                <label>
-                    Field Name
-                </label>
-
-                <input
-                    type="text"
-                    id="fieldName"
-                    placeholder="e.g. Student Name"
-                    required
-                >
-
-                <small>
-                    The name that will appear on the report.
-                </small>
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label>
-                    Excel Column
-                </label>
-
-                <input
-                    type="text"
-                    id="excelColumn"
-                    placeholder="e.g. NAME"
-                    required
-                >
-
-                <small>
-                    The column heading in the uploaded Excel file.
-                </small>
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label>
-                    Field Type
-                </label>
-
-                <select id="fieldType">
-
-                    <option value="text">
-                        Text
-                    </option>
-
-                    <option value="score">
-                        Score
-                    </option>
-
-                    <option value="long_text">
-                        Long Text / Comment
-                    </option>
-
-                    <option value="number">
-                        Number
-                    </option>
-
-                    <option value="date">
-                        Date
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <label class="checkbox-row">
-
-                <input
-                    type="checkbox"
-                    id="fieldRequired"
-                >
-
-                <span>
-
-                    Required field
-
-                    <small>
-                        The Excel file must contain
-                        this information.
-                    </small>
-
-                </span>
-
-            </label>
-
-
-            <label class="checkbox-row">
-
-                <input
-                    type="checkbox"
-                    id="fieldGrading"
-                >
-
-                <span>
-
-                    Include in grading
-
-                    <small>
-                        This field will contribute
-                        to the student's grade.
-                    </small>
-
-                </span>
-
-            </label>
-
-
-            <div class="form-group">
-
-                <label>
-                    Display Order
-                </label>
-
-                <input
-                    type="number"
-                    id="displayOrder"
-                    value="1"
-                    min="1"
-                >
-
-            </div>
-
-
-            <div class="modal-actions">
-
-                <button
-                    type="button"
-                    class="cancel-button"
-                    onclick="closeFieldModal()"
-                >
-                    Cancel
-                </button>
-
-
-                <button
-                    type="submit"
-                    class="save-button"
-                >
-                    Save Field
-                </button>
-
-            </div>
-
-        </form>
-
     </div>
 
-</div>
-
-
-<script
-    src="{{ url_for('static', filename='js/configure.js') }}"
-></script>
-
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/configure.js') }}"></script>
 
 </body>
-
 </html>

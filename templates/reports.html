@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapReport — Reports</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+</head>
+
+<body>
+
+    <header class="app-header">
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='snapreport_logo.png') }}" alt="SnapReport" class="header-logo">
+            <span class="header-brand">Snap<span>Report</span></span>
+        </div>
+        <nav class="header-nav">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/templates">Templates</a>
+            <a href="/reports" class="active">Reports</a>
+            <a href="/">Create New</a>
+        </nav>
+    </header>
+
+    <main class="app-main">
+
+        <div class="page-header">
+            <h1 class="page-title">Generated <span>reports</span></h1>
+            {% if template %}
+                <p class="page-subtitle">Reports generated from {{ template['name'] }} at {{ template['school_name'] }}.</p>
+            {% else %}
+                <p class="page-subtitle">All reports generated across your templates.</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            {% if reports %}
+                <div class="table-wrapper" style="border: none; box-shadow: none;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Report</th>
+                                <th>School</th>
+                                <th>Source File</th>
+                                <th>Students</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in reports %}
+                            <tr>
+                                <td><strong>{{ r['template_name'] }}</strong></td>
+                                <td class="text-muted">{{ r['school_name'] }}</td>
+                                <td class="text-muted">{{ r['filename'] }}</td>
+                                <td>
+                                    <span class="badge badge-primary">{{ r['student_count'] }} students</span>
+                                </td>
+                                <td class="text-muted">{{ r['created_at'] }}</td>
+                                <td>
+                                    <a href="/api/reports/{{ r['id'] }}/download" class="btn btn-primary btn-sm">Download PDF</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📄</div>
+                    <h3>No reports yet</h3>
+                    <p>Go to a template and upload an Excel file to generate your first report.</p>
+                    <a href="/templates" class="btn btn-primary">View Templates →</a>
+                </div>
+            {% endif %}
+        </div>
+
+    </main>
+
+    <footer class="app-footer">
+        SnapReport · Capture. Report. Insight. Action.
+        <br>
+        &copy; 2026 · Developed by <strong>Omihan Tech</strong>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+</body>
+</html>

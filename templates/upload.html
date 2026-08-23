@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapReport — Upload Excel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+    <style>
+        .grade-A { background: rgba(34, 197, 94, 0.1); color: #166534; }
+        .grade-B { background: rgba(37, 99, 235, 0.1); color: #1e40af; }
+        .grade-C { background: rgba(245, 158, 11, 0.1); color: #92400e; }
+        .grade-D { background: rgba(249, 115, 22, 0.1); color: #9a3412; }
+        .grade-F { background: rgba(239, 68, 68, 0.1); color: #991b1b; }
+        .grade-N\/A { background: var(--color-surface-hover); color: var(--color-text-muted); }
+    </style>
+</head>
+
+<body>
+
+    <header class="app-header">
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='snapreport_logo.png') }}" alt="SnapReport" class="header-logo">
+            <span class="header-brand">Snap<span>Report</span></span>
+        </div>
+        <nav class="header-nav">
+            <a href="/configure/{{ template['id'] }}">← Back to Fields</a>
+        </nav>
+    </header>
+
+    <main class="app-main">
+
+        <div class="page-header">
+            <h1 class="page-title">Upload <span>Excel</span></h1>
+            <p class="page-subtitle">Upload your student data file. SnapReport will validate the columns against your configured fields and process the records.</p>
+        </div>
+
+        <div class="info-bar">
+            <div class="info-item">
+                <span class="info-label">Report Type</span>
+                <span class="info-value">{{ template['name'] }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">School</span>
+                <span class="info-value">{{ template['school_name'] }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Year</span>
+                <span class="info-value">{{ template['academic_year'] }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Term</span>
+                <span class="info-value">{{ template['term'] }}</span>
+            </div>
+        </div>
+
+        <!-- Upload Zone -->
+        <div class="card" id="uploadCard">
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📁</div>
+                <h3>Drop your Excel or CSV file here</h3>
+                <p>Supports .xlsx, .xls, and .csv files</p>
+                <button class="btn btn-primary" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+                    Browse Files
+                </button>
+            </div>
+            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+
+            <div style="margin-top: var(--space-6);">
+                <h4 style="font-size: var(--text-sm); font-weight: var(--weight-semibold); margin-bottom: var(--space-3);">Expected columns in your file:</h4>
+                <div class="tag-list">
+                    {% for field in fields %}
+                    <span class="tag {{ 'tag-required' if field['required'] else '' }}">
+                        {{ field['excel_column'] }}{{ ' *' if field['required'] else '' }}
+                    </span>
+                    {% endfor %}
+                </div>
+                <p class="text-xs text-muted" style="margin-top: var(--space-2);">* Required fields must have data in every row.</p>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading-state" style="display: none;">
+            <div class="spinner"></div>
+            <span>Processing your file...</span>
+        </div>
+
+        <!-- Error -->
+        <div id="errorBox" style="display: none; margin-top: var(--space-4);">
+            <div class="card" style="border-color: var(--color-error); background: var(--color-error-light);">
+                <h4 style="color: var(--color-error); margin-bottom: var(--space-3);">Validation Errors</h4>
+                <ul id="errorList" style="margin-left: var(--space-5); font-size: var(--text-sm); color: var(--color-error);"></ul>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results" style="display: none; margin-top: var(--space-6);">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Results — <span id="studentCount">0</span> students</h3>
+                </div>
+                <div class="table-wrapper" style="border: none; box-shadow: none;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                {% for field in fields %}
+                                <th>{{ field['field_name'] }}</th>
+                                {% endfor %}
+                                <th>Total</th>
+                                <th>Grade</th>
+                                <th>Remark</th>
+                                <th>Position</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="app-footer">
+        SnapReport · Capture. Report. Insight. Action.
+        <br>
+        &copy; 2026 · Developed by <strong>Omihan Tech</strong>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>
+        const templateId = {{ template['id'] }};
+        const fieldNames = {{ fields | map(attribute='field_name') | list | tojson }};
+
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const errorBox = document.getElementById('errorBox');
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                handleFile(fileInput.files[0]);
+            }
+        });
+
+        async function handleFile(file) {
+            if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls') && !file.name.endsWith('.csv')) {
+                showToast('Only .xlsx, .xls, and .csv files are supported.', 'error');
+                return;
+            }
+
+            loading.style.display = 'flex';
+            results.style.display = 'none';
+            errorBox.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/templates/' + templateId + '/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                loading.style.display = 'none';
+
+                if (!response.ok) {
+                    const errorList = document.getElementById('errorList');
+                    errorList.innerHTML = '';
+
+                    if (data.validation_errors) {
+                        data.validation_errors.forEach(err => {
+                            const li = document.createElement('li');
+                            li.textContent = err;
+                            li.style.marginBottom = '4px';
+                            errorList.appendChild(li);
+                        });
+                    } else {
+                        const li = document.createElement('li');
+                        li.textContent = data.error;
+                        errorList.appendChild(li);
+                    }
+
+                    errorBox.style.display = 'block';
+                    return;
+                }
+
+                // Store data for the report viewer
+                sessionStorage.setItem('reportData', JSON.stringify(data));
+
+                renderResults(data);
+
+            } catch (error) {
+                loading.style.display = 'none';
+                showToast('Something went wrong while processing the file.', 'error');
+            }
+        }
+
+        function renderResults(data) {
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = '';
+            document.getElementById('studentCount').textContent = data.meta.total_students;
+
+            data.students.forEach(student => {
+                const tr = document.createElement('tr');
+                let cells = `<td>${student._position}</td>`;
+
+                fieldNames.forEach(name => {
+                    cells += `<td>${student[name] || ''}</td>`;
+                });
+
+                cells += `<td><strong>${student._total}</strong></td>`;
+                cells += `<td><span class="badge badge-${student._grade.charAt(0) === 'N' ? 'neutral' : 'success'}">${student._grade}</span></td>`;
+                cells += `<td class="text-muted">${student._remark}</td>`;
+                cells += `<td>${student._position}</td>`;
+
+                tr.innerHTML = cells;
+                tbody.appendChild(tr);
+            });
+
+            results.style.display = 'block';
+
+            // Add View Reports button if not already present
+            if (!document.getElementById('viewReportsBtn')) {
+                const viewBtn = document.createElement('div');
+                viewBtn.id = 'viewReportsBtn';
+                viewBtn.style.marginTop = 'var(--space-4)';
+                viewBtn.style.textAlign = 'right';
+                viewBtn.innerHTML = '<a href="/report" class="btn btn-primary">View Generated Reports →</a>';
+                results.appendChild(viewBtn);
+            }
+
+            showToast(`${data.meta.total_students} students processed successfully!`, 'success');
+        }
+    </script>
+
+</body>
+</html>
