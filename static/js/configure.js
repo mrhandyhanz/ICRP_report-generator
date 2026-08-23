@@ -61,6 +61,23 @@ function closeFieldModal() {
     */
 
     document.getElementById('displayOrder').value = 1;
+
+    /*
+        Clear the hidden field ID so the save
+        handler knows we are back in "add" mode.
+    */
+
+    document.getElementById('fieldId').value = '';
+
+    /*
+        Restore the modal heading to "Add" mode.
+    */        const modalTitle =
+            document.getElementById('modalTitle');
+
+        if (modalTitle) {
+            modalTitle.textContent =
+                'Add Report Field';
+        }
 }
 
 
@@ -174,6 +191,65 @@ document
 
 
             /* ------------------------------------------------
+               CHECK IF EDITING OR CREATING
+               ------------------------------------------------ */
+
+            const editingId =
+                document.getElementById(
+                    'fieldId'
+                ).value;
+
+            const isEditing =
+                editingId !== '';
+
+            /*
+                Build the URL and method:
+
+                - POST  /api/report-fields          (create)
+                - PUT   /api/report-fields/<id>      (update)
+            */
+
+            const url = isEditing
+                ? '/api/report-fields/' + editingId
+                : '/api/report-fields';
+
+            const method = isEditing
+                ? 'PUT'
+                : 'POST';
+
+            const payload = isEditing
+                ? {
+                    field_name:
+                        fieldName,
+                    excel_column:
+                        excelColumn,
+                    field_type:
+                        fieldType,
+                    required:
+                        required,
+                    include_in_grading:
+                        includeInGrading,
+                    display_order:
+                        displayOrder
+                }
+                : {
+                    template_id:
+                        Number(templateId),
+                    field_name:
+                        fieldName,
+                    excel_column:
+                        excelColumn,
+                    field_type:
+                        fieldType,
+                    required:
+                        required,
+                    include_in_grading:
+                        includeInGrading,
+                    display_order:
+                        displayOrder
+                };
+
+            /* ------------------------------------------------
                SEND DATA TO FLASK
                ------------------------------------------------ */
 
@@ -181,38 +257,19 @@ document
 
                 const response =
                     await fetch(
-                        '/api/report-fields',
+                        url,
                         {
-                            method: 'POST',
+                            method: method,
 
                             headers: {
                                 'Content-Type':
                                     'application/json'
                             },
 
-                            body: JSON.stringify({
-
-                                template_id:
-                                    Number(templateId),
-
-                                field_name:
-                                    fieldName,
-
-                                excel_column:
-                                    excelColumn,
-
-                                field_type:
-                                    fieldType,
-
-                                required:
-                                    required,
-
-                                include_in_grading:
-                                    includeInGrading,
-
-                                display_order:
-                                    displayOrder
-                            })
+                            body:
+                                JSON.stringify(
+                                    payload
+                                )
                         }
                     );
 
@@ -233,7 +290,7 @@ document
 
                     alert(
                         result.error ||
-                        'Unable to create field.'
+                        'Unable to save field.'
                     );
 
                     return;
@@ -245,7 +302,9 @@ document
                    -------------------------------------------- */
 
                 alert(
-                    'Field created successfully!'
+                    isEditing
+                        ? 'Field updated successfully!'
+                        : 'Field created successfully!'
                 );
 
 
@@ -263,7 +322,7 @@ document
             catch (error) {
 
                 console.error(
-                    'Error creating field:',
+                    'Error saving field:',
                     error
                 );
 
@@ -280,24 +339,98 @@ document
    EDIT FIELD
    ========================================================= */
 
-function editField(fieldId) {
+async function editField(fieldId) {
 
-    /*
-        This is intentionally not implemented yet.
+    try {
 
-        Later we will:
+        const response =
+            await fetch(
+                '/api/report-fields/' + fieldId
+            );
 
-        1. Get the field from SQLite.
-        2. Populate the modal.
-        3. Change "Add Field" to "Edit Field".
-        4. Send PUT/PATCH request.
-        5. Update SQLite.
-    */
+        const result =
+            await response.json();
 
-    alert(
-        'Edit field ' + fieldId +
-        ' will be implemented next.'
-    );
+        if (!response.ok) {
+
+            alert(
+                result.error ||
+                'Unable to load field.'
+            );
+
+            return;
+        }
+
+        const field = result.field;
+
+        /*
+            Populate the modal with the field's
+            current values.
+        */
+
+        document.getElementById(
+            'fieldId'
+        ).value = field.id;
+
+        document.getElementById(
+            'fieldName'
+        ).value = field.field_name;
+
+        document.getElementById(
+            'excelColumn'
+        ).value = field.excel_column;
+
+        document.getElementById(
+            'fieldType'
+        ).value = field.field_type;
+
+        document.getElementById(
+            'fieldRequired'
+        ).checked = Boolean(field.required);
+
+        document.getElementById(
+            'fieldGrading'
+        ).checked = Boolean(
+            field.include_in_grading
+        );
+
+        document.getElementById(
+            'displayOrder'
+        ).value = field.display_order;
+
+        /*
+            Change the modal heading to indicate
+            we are editing.
+        */
+
+        const modalTitle =
+            document.getElementById('modalTitle');
+
+        if (modalTitle) {
+            modalTitle.textContent =
+                'Edit Report Field';
+        }
+
+        /*
+            Open the modal.
+        */
+
+        const modal =
+            document.getElementById('fieldModal');
+
+        modal.classList.add('active');
+
+    }
+    catch (error) {
+
+        console.error(
+            'Error loading field:', error
+        );
+
+        alert(
+            'Something went wrong while loading the field.'
+        );
+    }
 }
 
 

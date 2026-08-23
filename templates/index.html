@@ -2,1098 +2,151 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-
-  <!-- Makes the page responsive on phones, tablets and desktops -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>SnapReport — Create Report</title>
-
-  <meta
-    name="description"
-    content="SnapReport - Flexible student report generation system."
-  >
-
-  <!-- Google Fonts -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap"
-    rel="stylesheet"
-  >
-
-  <style>
-
-    /* =====================================================
-       GLOBAL VARIABLES
-       ===================================================== */
-
-    :root {
-      --primary: #ffffff;
-      --accent: #1f4e79;
-      --accent-hover: #163857;
-
-      --ink: #1e293b;
-      --muted: #64748b;
-
-      --background: #f0f4f8;
-      --border: #e2e8f0;
-
-      --danger: #ef4444;
-      --success: #10b981;
-    }
-
-
-    /* =====================================================
-       BASIC RESET
-       ===================================================== */
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-
-    body {
-      min-height: 100vh;
-
-      background: var(--background);
-
-      color: var(--ink);
-
-      font-family: 'DM Sans', sans-serif;
-
-      display: flex;
-      flex-direction: column;
-    }
-
-
-    /* =====================================================
-       HEADER
-       ===================================================== */
-
-    header {
-      background: var(--primary);
-
-      border-bottom: 1px solid var(--border);
-
-      padding: 18px 48px;
-
-      display: flex;
-      align-items: center;
-
-      gap: 14px;
-    }
-
-
-    .logo-mark {
-      height: 48px;
-
-      display: flex;
-      align-items: center;
-    }
-
-
-    .logo-mark img {
-      height: 100%;
-      width: auto;
-
-      max-width: 200px;
-
-      object-fit: contain;
-    }
-
-
-    header h1 {
-      font-family: 'Playfair Display', serif;
-
-      color: var(--accent);
-
-      font-size: 22px;
-
-      letter-spacing: .5px;
-    }
-
-
-    header span {
-      color: var(--muted);
-
-      font-size: 12px;
-
-      font-weight: 300;
-
-      margin-left: 4px;
-
-      letter-spacing: 2px;
-
-      text-transform: uppercase;
-    }
-
-
-    /* =====================================================
-       MAIN CONTENT
-       ===================================================== */
-
-    main {
-      flex: 1;
-
-      display: flex;
-
-      justify-content: center;
-
-      align-items: center;
-
-      padding: 60px 24px;
-    }
-
-
-    .container {
-      width: 100%;
-
-      max-width: 760px;
-    }
-
-
-    /* =====================================================
-       PAGE INTRODUCTION
-       ===================================================== */
-
-    .page-title {
-      font-family: 'Playfair Display', serif;
-
-      font-size: 42px;
-
-      line-height: 1.15;
-
-      margin-bottom: 10px;
-    }
-
-
-    .page-title em {
-      color: var(--accent);
-
-      font-style: normal;
-
-      position: relative;
-    }
-
-
-    .page-title em::after {
-      content: '';
-
-      position: absolute;
-
-      left: 0;
-
-      right: 0;
-
-      bottom: 2px;
-
-      height: 3px;
-
-      background: var(--accent);
-
-      opacity: .2;
-    }
-
-
-    .subtitle {
-      color: var(--muted);
-
-      font-size: 15px;
-
-      line-height: 1.7;
-
-      margin-bottom: 32px;
-
-      max-width: 600px;
-    }
-
-
-    /* =====================================================
-       FORM CARD
-       ===================================================== */
-
-    .card {
-      background: var(--primary);
-
-      border: 1px solid var(--border);
-
-      border-radius: 16px;
-
-      padding: 34px;
-
-      box-shadow:
-        0 10px 30px rgba(15, 23, 42, 0.06);
-    }
-
-
-    .section-label {
-      font-size: 11px;
-
-      font-weight: 600;
-
-      letter-spacing: 2px;
-
-      text-transform: uppercase;
-
-      color: var(--accent);
-
-      margin-bottom: 24px;
-    }
-
-
-    /* =====================================================
-       FORM ELEMENTS
-       ===================================================== */
-
-    .form-group {
-      margin-bottom: 22px;
-    }
-
-
-    label {
-      display: block;
-
-      margin-bottom: 8px;
-
-      font-size: 13px;
-
-      font-weight: 600;
-
-      color: var(--ink);
-    }
-
-
-    input,
-    select {
-      width: 100%;
-
-      height: 48px;
-
-      padding: 0 14px;
-
-      border: 1px solid var(--border);
-
-      border-radius: 8px;
-
-      background: #fff;
-
-      color: var(--ink);
-
-      font-family: inherit;
-
-      font-size: 14px;
-
-      outline: none;
-
-      transition: border-color .2s, box-shadow .2s;
-    }
-
-
-    input:focus,
-    select:focus {
-      border-color: var(--accent);
-
-      box-shadow:
-        0 0 0 3px rgba(31, 78, 121, .10);
-    }
-
-
-    /* =====================================================
-       BUTTON
-       ===================================================== */
-
-    .submit-btn {
-      width: 100%;
-
-      height: 50px;
-
-      border: none;
-
-      border-radius: 8px;
-
-      background: var(--accent);
-
-      color: white;
-
-      font-family: inherit;
-
-      font-size: 14px;
-
-      font-weight: 600;
-
-      cursor: pointer;
-
-      transition: background .2s, transform .1s;
-    }
-
-
-    .submit-btn:hover {
-      background: var(--accent-hover);
-    }
-
-
-    .submit-btn:active {
-      transform: scale(.99);
-    }
-
-
-    .submit-btn:disabled {
-      opacity: .6;
-
-      cursor: not-allowed;
-    }
-
-
-    /* =====================================================
-       TOAST / MESSAGE
-       ===================================================== */
-
-    .toast {
-      display: none;
-
-      margin-top: 18px;
-
-      padding: 12px 14px;
-
-      border-radius: 8px;
-
-      font-size: 13px;
-    }
-
-
-    .toast.visible {
-      display: block;
-    }
-
-
-    .toast.error {
-      background: #fef2f2;
-
-      color: #b91c1c;
-
-      border: 1px solid #fecaca;
-    }
-
-
-    .toast.success {
-      background: #ecfdf5;
-
-      color: #047857;
-
-      border: 1px solid #a7f3d0;
-    }
-
-
-    /* =====================================================
-       LOADING INDICATOR
-       ===================================================== */
-
-    .loading {
-      display: none;
-
-      text-align: center;
-
-      margin-top: 18px;
-
-      color: var(--muted);
-
-      font-size: 13px;
-    }
-
-
-    .loading.visible {
-      display: block;
-    }
-
-
-    /* =====================================================
-       FOOTER
-       ===================================================== */
-
-    footer {
-      text-align: center;
-
-      padding: 24px;
-
-      color: var(--muted);
-
-      font-size: 12px;
-
-      line-height: 1.7;
-    }
-
-
-    footer strong {
-      color: var(--accent);
-    }
-
-
-    /* =====================================================
-       RESPONSIVE DESIGN
-       ===================================================== */
-
-    @media (max-width: 600px) {
-
-      header {
-        padding: 16px 20px;
-      }
-
-
-      header span {
-        display: none;
-      }
-
-
-      main {
-        padding: 40px 16px;
-      }
-
-
-      .page-title {
-        font-size: 34px;
-      }
-
-
-      .card {
-        padding: 24px;
-      }
-
-    }
-
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapReport — Create Report</title>
+    <meta name="description" content="SnapReport - Capture. Report. Insight. Action.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
 </head>
-
 
 <body>
 
+    <header class="app-header">
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='snapreport_logo.png') }}" alt="SnapReport" class="header-logo">
+            <span class="header-brand">Snap<span>Report</span></span>
+        </div>
+        <nav class="header-nav">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/templates">Templates</a>
+            <a href="/reports">Reports</a>
+            <a href="/" class="active">Create New</a>
+        </nav>
+    </header>
 
-  <!-- =====================================================
-       HEADER
-       ===================================================== -->
+    <main class="app-main">
 
-  <header>
-
-    <div class="logo-mark">
-
-      <!--
-        Existing SnapReport logo.
-
-        We are reusing the logo that already exists
-        in your static folder.
-      -->
-      <img
-        src="{{ url_for('static', filename='icrp_logo.png') }}"
-        alt="SnapReport"
-      >
-
-    </div>
-
-
-    <div>
-
-      <h1>SnapReport</h1>
-
-      <span>Student Report Generator</span>
-
-    </div>
-
-  </header>
-
-
-
-  <!-- =====================================================
-       MAIN CONTENT
-       ===================================================== -->
-
-  <main>
-
-    <div class="container">
-
-
-      <!-- Introduction -->
-
-      <h2 class="page-title">
-        Create your <em>report</em>
-      </h2>
-
-
-      <p class="subtitle">
-        Configure your report before uploading student data.
-        SnapReport will use your configuration to determine
-        the fields, grading criteria and final report layout.
-      </p>
-
-
-
-      <!-- =================================================
-           REPORT CONFIGURATION CARD
-           ================================================= -->
-
-      <div class="card">
-
-        <div class="section-label">
-          Report Configuration
+        <div class="page-header">
+            <h1 class="page-title">Create your <span>report</span></h1>
+            <p class="page-subtitle">Configure your report before uploading student data. SnapReport will use your configuration to determine the fields, grading criteria and final report layout.</p>
         </div>
 
+        <div class="card" style="max-width: 640px;">
+            <div style="margin-bottom: var(--space-6);">
+                <span class="badge badge-primary" style="margin-bottom: var(--space-4); display: inline-block;">Report Configuration</span>
+            </div>
 
-        <!-- =================================================
-             REPORT TYPE
-             ================================================= -->
+            <div class="form-group">
+                <label class="form-label" for="report_type">Report Type</label>
+                <select id="report_type" class="form-select">
+                    <option value="ICRP Report">ICRP Report</option>
+                    <option value="End of Term Report">End of Term Report</option>
+                    <option value="Progress Report">Progress Report</option>
+                    <option value="Continuous Assessment Report">Continuous Assessment Report</option>
+                    <option value="Custom Report">Custom Report</option>
+                </select>
+            </div>
 
-        <div class="form-group">
+            <div class="form-group">
+                <label class="form-label" for="school_name">School Name</label>
+                <input type="text" id="school_name" class="form-input" placeholder="e.g. Netzah International School">
+            </div>
 
-          <label for="report_type">
-            Report Type
-          </label>
+            <div class="form-group">
+                <label class="form-label" for="academic_year">Academic Year</label>
+                <input type="number" id="academic_year" class="form-input" min="2000" max="2099">
+            </div>
 
+            <div class="form-group">
+                <label class="form-label" for="term">Academic Term</label>
+                <select id="term" class="form-select">
+                    <option value="Term 1">Term 1</option>
+                    <option value="Term 2">Term 2</option>
+                    <option value="Term 3">Term 3</option>
+                    <option value="Semester 1">Semester 1</option>
+                    <option value="Semester 2">Semester 2</option>
+                </select>
+            </div>
 
-          <!--
-            For now we provide common report types.
+            <button class="btn btn-primary btn-lg" style="width: 100%; margin-top: var(--space-4);" id="continueBtn" onclick="createReport()">
+                Continue →
+            </button>
 
-            Later we can allow users to create their own
-            report types.
-          -->
-
-          <select id="report_type">
-
-            <option value="ICRP Report">
-              ICRP Report
-            </option>
-
-            <option value="End of Term Report">
-              End of Term Report
-            </option>
-
-            <option value="Progress Report">
-              Progress Report
-            </option>
-
-            <option value="Continuous Assessment Report">
-              Continuous Assessment Report
-            </option>
-
-            <option value="Custom Report">
-              Custom Report
-            </option>
-
-          </select>
-
+            <div id="loading" class="loading-state" style="display: none; padding: var(--space-6);">
+                <div class="spinner"></div>
+                <span class="text-muted text-sm">Creating report configuration...</span>
+            </div>
         </div>
 
-
-
-        <!-- =================================================
-             SCHOOL NAME
-             ================================================= -->
-
-        <div class="form-group">
-
-          <label for="school_name">
-            School Name
-          </label>
-
-
-          <input
-            type="text"
-            id="school_name"
-            placeholder="e.g. Netzah International School"
-          >
-
-        </div>
-
-
-
-        <!-- =================================================
-             ACADEMIC YEAR
-             ================================================= -->
-
-        <div class="form-group">
-
-          <label for="academic_year">
-            Academic Year
-          </label>
-
-
-          <input
-            type="number"
-            id="academic_year"
-            min="2000"
-            max="2099"
-          >
-
-        </div>
-
-
-
-        <!-- =================================================
-             ACADEMIC TERM
-             ================================================= -->
-
-        <div class="form-group">
-
-          <label for="term">
-            Academic Term
-          </label>
-
-
-          <select id="term">
-
-            <option value="Term 1">
-              Term 1
-            </option>
-
-            <option value="Term 2">
-              Term 2
-            </option>
-
-            <option value="Term 3">
-              Term 3
-            </option>
-
-            <option value="Semester 1">
-              Semester 1
-            </option>
-
-            <option value="Semester 2">
-              Semester 2
-            </option>
-
-          </select>
-
-        </div>
-
-
-
-        <!-- =================================================
-             SUBMIT BUTTON
-             ================================================= -->
-
-        <button
-          class="submit-btn"
-          id="continueBtn"
-          onclick="createReport()"
-        >
-          Continue →
-        </button>
-
-
-
-        <!-- Message area -->
-
-        <div
-          class="toast"
-          id="toast"
-        ></div>
-
-
-        <!-- Loading message -->
-
-        <div
-          class="loading"
-          id="loading"
-        >
-          Creating report configuration...
-        </div>
-
-      </div>
-
-    </div>
-
-  </main>
-
-
-
-  <!-- =====================================================
-       FOOTER
-       ===================================================== -->
-
-  <footer>
-
-    SnapReport · Built for schools
-
-    <br>
-
-    &copy;
-    <span id="footerYear"></span>
-
-    · Developed by
-    <strong>Omihan Tech</strong>
-
-  </footer>
-
-
-
-  <!-- =====================================================
-       JAVASCRIPT
-       ===================================================== -->
-
-  <script>
-
-
-    // =====================================================
-    // SET CURRENT YEAR
-    // =====================================================
-
-    // JavaScript gets the current year from the computer.
-    //
-    // Example:
-    //
-    // 2026
-    //
-    // This means the user doesn't have to type it manually.
-
-    const currentYear = new Date().getFullYear();
-
-
-    document.getElementById(
-      'academic_year'
-    ).value = currentYear;
-
-
-    document.getElementById(
-      'footerYear'
-    ).textContent = currentYear;
-
-
-
-    // =====================================================
-    // DISPLAY MESSAGE
-    // =====================================================
-
-    function showMessage(message, type) {
-
-      const toast = document.getElementById('toast');
-
-
-      // Put the message inside the toast.
-      toast.textContent = message;
-
-
-      // Apply the appropriate CSS class.
-      toast.className = 'toast visible ' + type;
-
-    }
-
-
-
-    // =====================================================
-    // HIDE MESSAGE
-    // =====================================================
-
-    function hideMessage() {
-
-      const toast = document.getElementById('toast');
-
-
-      toast.className = 'toast';
-
-    }
-
-
-
-    // =====================================================
-    // CREATE REPORT
-    // =====================================================
-
-    async function createReport() {
-
-
-      // Get values from the form.
-
-      const reportType =
-        document.getElementById('report_type').value;
-
-
-      const schoolName =
-        document.getElementById('school_name').value.trim();
-
-
-      const academicYear =
-        document.getElementById('academic_year').value;
-
-
-      const term =
-        document.getElementById('term').value;
-
-
-
-      // -----------------------------------------------------
-      // FRONTEND VALIDATION
-      // -----------------------------------------------------
-
-      if (!reportType) {
-
-        showMessage(
-          'Please select a report type.',
-          'error'
-        );
-
-        return;
-
-      }
-
-
-      if (!schoolName) {
-
-        showMessage(
-          'Please enter the school name.',
-          'error'
-        );
-
-        return;
-
-      }
-
-
-      if (!academicYear) {
-
-        showMessage(
-          'Please enter the academic year.',
-          'error'
-        );
-
-        return;
-
-      }
-
-
-      if (!term) {
-
-        showMessage(
-          'Please select an academic term.',
-          'error'
-        );
-
-        return;
-
-      }
-
-
-
-      // -----------------------------------------------------
-      // PREPARE DATA
-      // -----------------------------------------------------
-
-      /*
-        FormData packages our form information so that
-        Flask can receive it through request.form.
-
-        We are sending:
-
-            report_type
-            school_name
-            academic_year
-            term
-      */
-
-      const formData = new FormData();
-
-
-      formData.append(
-        'report_type',
-        reportType
-      );
-
-
-      formData.append(
-        'school_name',
-        schoolName
-      );
-
-
-      formData.append(
-        'academic_year',
-        academicYear
-      );
-
-
-      formData.append(
-        'term',
-        term
-      );
-
-
-
-      // -----------------------------------------------------
-      // SHOW LOADING STATE
-      // -----------------------------------------------------
-
-      const continueBtn =
-        document.getElementById('continueBtn');
-
-
-      const loading =
-        document.getElementById('loading');
-
-
-      continueBtn.disabled = true;
-
-      loading.classList.add('visible');
-
-      hideMessage();
-
-
-
-      try {
-
-
-        // ---------------------------------------------------
-        // SEND DATA TO FLASK
-        // ---------------------------------------------------
-
-        /*
-          The browser sends our information to:
-
-              POST /create-report
-
-          This matches the route we created in app.py.
-        */
-
-        const response = await fetch(
-          '/create-report',
-          {
-            method: 'POST',
-
-            body: formData
-          }
-        );
-
-
-
-        // Convert Flask's JSON response into JavaScript.
-        const data = await response.json();
-
-
-
-        // ---------------------------------------------------
-        // HANDLE SERVER ERROR
-        // ---------------------------------------------------
-
-        if (!response.ok || data.error) {
-
-          showMessage(
-            data.error || 'Unable to create report.',
-            'error'
-          );
-
-          continueBtn.disabled = false;
-
-          loading.classList.remove('visible');
-
-          return;
-
+    </main>
+
+    <footer class="app-footer">
+        SnapReport · Capture. Report. Insight. Action.
+        <br>
+        &copy; 2026 · Developed by <strong>Omihan Tech</strong>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>
+        // Set current year.
+        document.getElementById('academic_year').value = new Date().getFullYear();
+
+        async function createReport() {
+            const reportType = document.getElementById('report_type').value;
+            const schoolName = document.getElementById('school_name').value.trim();
+            const academicYear = document.getElementById('academic_year').value;
+            const term = document.getElementById('term').value;
+
+            // Validation.
+            if (!schoolName) {
+                showToast('Please enter the school name.', 'error');
+                document.getElementById('school_name').focus();
+                return;
+            }
+
+            const btn = document.getElementById('continueBtn');
+            const loading = document.getElementById('loading');
+            setButtonLoading(btn, true);
+            loading.style.display = 'flex';
+
+            try {
+                const formData = new FormData();
+                formData.append('report_type', reportType);
+                formData.append('school_name', schoolName);
+                formData.append('academic_year', academicYear);
+                formData.append('term', term);
+
+                const response = await fetch('/create-report', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || data.error) {
+                    showToast(data.error || 'Unable to create report.', 'error');
+                    setButtonLoading(btn, false);
+                    loading.style.display = 'none';
+                    return;
+                }
+
+                showToast('Report configuration created!', 'success');
+
+                setTimeout(() => {
+                    window.location.href = '/configure/' + data.template_id;
+                }, 800);
+
+            } catch (error) {
+                console.error(error);
+                showToast('Unable to connect to the server.', 'error');
+                setButtonLoading(btn, false);
+                loading.style.display = 'none';
+            }
         }
-
-
-
-        // ---------------------------------------------------
-        // SUCCESS
-        // ---------------------------------------------------
-
-        /*
-          Flask should return something like:
-
-          {
-              "success": true,
-              "template_id": 5,
-              "message": "Report created successfully."
-          }
-
-          We save the template ID because it identifies
-          this particular report configuration.
-        */
-
-        const templateId =
-          data.template_id;
-
-
-        // Save it temporarily in the browser.
-        sessionStorage.setItem(
-          'template_id',
-          templateId
-        );
-
-
-        // Also save the basic report information.
-        sessionStorage.setItem(
-          'report_type',
-          reportType
-        );
-
-
-        sessionStorage.setItem(
-          'school_name',
-          schoolName
-        );
-
-
-        sessionStorage.setItem(
-          'academic_year',
-          academicYear
-        );
-
-
-        sessionStorage.setItem(
-          'term',
-          term
-        );
-
-
-
-        showMessage(
-          'Report configuration created successfully.',
-          'success'
-        );
-
-
-        /*
-          For now we stop here.
-
-          Our next step will create:
-
-              /configure/<template_id>
-
-          where the user will configure the report fields.
-
-          We will uncomment/add the redirect once that
-          page exists.
-        */
-
-        setTimeout(() => {
-
-          window.location.href =
-            '/configure/' + templateId;
-
-        }, 700);
-
-
-      } catch (error) {
-
-
-        // ---------------------------------------------------
-        // NETWORK / SERVER ERROR
-        // ---------------------------------------------------
-
-        console.error(error);
-
-
-        showMessage(
-          'Unable to connect to the SnapReport server.',
-          'error'
-        );
-
-
-        continueBtn.disabled = false;
-
-        loading.classList.remove('visible');
-
-      }
-
-    }
-
-  </script>
+    </script>
 
 </body>
-
 </html>
