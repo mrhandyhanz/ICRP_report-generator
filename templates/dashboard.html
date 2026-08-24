@@ -18,6 +18,9 @@
             <img src="{{ url_for('static', filename='snapreport_logo.png') }}" alt="SnapReport" class="header-logo">
             <span class="header-brand">Snap<span>Report</span></span>
         </div>
+        <button class="hamburger" onclick="this.classList.toggle('active'); document.querySelector('.header-nav').classList.toggle('open');" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
         <nav class="header-nav">
             <a href="/dashboard" class="active">Dashboard</a>
             <a href="/templates">Templates</a>
@@ -89,14 +92,14 @@
                         <tbody>
                             {% for r in stats['recent_reports'] %}
                             <tr>
-                                <td>
+                                <td data-label="Report">
                                     <strong>{{ r['template_name'] }}</strong>
                                 </td>
-                                <td class="text-muted">{{ r['filename'] }}</td>
-                                <td>
+                                <td data-label="Source" class="text-muted">{{ r['filename'] }}</td>
+                                <td data-label="Students">
                                     <span class="badge badge-primary">{{ r['student_count'] }} students</span>
                                 </td>
-                                <td class="text-muted">{{ r['created_at'] }}</td>
+                                <td data-label="Date" class="text-muted">{{ r['created_at'] }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

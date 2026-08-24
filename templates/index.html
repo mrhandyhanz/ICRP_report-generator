@@ -19,6 +19,9 @@
             <img src="{{ url_for('static', filename='snapreport_logo.png') }}" alt="SnapReport" class="header-logo">
             <span class="header-brand">Snap<span>Report</span></span>
         </div>
+        <button class="hamburger" onclick="this.classList.toggle('active'); document.querySelector('.header-nav').classList.toggle('open');" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
         <nav class="header-nav">
             <a href="/dashboard">Dashboard</a>
             <a href="/templates">Templates</a>

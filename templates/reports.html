@@ -18,6 +18,9 @@
             <img src="{{ url_for('static', filename='snapreport_logo.png') }}" alt="SnapReport" class="header-logo">
             <span class="header-brand">Snap<span>Report</span></span>
         </div>
+        <button class="hamburger" onclick="this.classList.toggle('active'); document.querySelector('.header-nav').classList.toggle('open');" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
         <nav class="header-nav">
             <a href="/dashboard">Dashboard</a>
             <a href="/templates">Templates</a>
@@ -54,14 +57,14 @@
                         <tbody>
                             {% for r in reports %}
                             <tr>
-                                <td><strong>{{ r['template_name'] }}</strong></td>
-                                <td class="text-muted">{{ r['school_name'] }}</td>
-                                <td class="text-muted">{{ r['filename'] }}</td>
-                                <td>
+                                <td data-label="Report"><strong>{{ r['template_name'] }}</strong></td>
+                                <td data-label="School" class="text-muted">{{ r['school_name'] }}</td>
+                                <td data-label="Source" class="text-muted">{{ r['filename'] }}</td>
+                                <td data-label="Students">
                                     <span class="badge badge-primary">{{ r['student_count'] }} students</span>
                                 </td>
-                                <td class="text-muted">{{ r['created_at'] }}</td>
-                                <td>
+                                <td data-label="Date" class="text-muted">{{ r['created_at'] }}</td>
+                                <td data-label="Action">
                                     <a href="/api/reports/{{ r['id'] }}/download" class="btn btn-primary btn-sm">Download PDF</a>
                                 </td>
                             </tr>

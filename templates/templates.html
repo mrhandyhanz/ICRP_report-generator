@@ -18,6 +18,9 @@
             <img src="{{ url_for('static', filename='snapreport_logo.png') }}" alt="SnapReport" class="header-logo">
             <span class="header-brand">Snap<span>Report</span></span>
         </div>
+        <button class="hamburger" onclick="this.classList.toggle('active'); document.querySelector('.header-nav').classList.toggle('open');" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
         <nav class="header-nav">
             <a href="/dashboard">Dashboard</a>
             <a href="/templates" class="active">Templates</a>
@@ -36,7 +39,7 @@
         <div class="card">
             {% if templates %}
                 {% for t in templates %}
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-4) 0; border-bottom: 1px solid var(--color-border-light);">
+                <div class="template-list-item" style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-4) 0; border-bottom: 1px solid var(--color-border-light);">
                     <div style="flex: 1;">
                         <h4 style="font-size: var(--text-base); font-weight: var(--weight-semibold); margin-bottom: var(--space-1);">
                             {{ t['name'] }}
@@ -48,7 +51,7 @@
                             {{ t['field_count'] }} field{{ 's' if t['field_count'] != 1 else '' }}
                         </span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: var(--space-3);">
+                    <div class="template-list-actions" style="display: flex; align-items: center; gap: var(--space-3);">
                         <a href="/configure/{{ t['id'] }}" class="btn btn-primary btn-sm">Open →</a>
                         <button class="btn btn-ghost btn-sm" style="color: var(--color-error);" onclick="deleteTemplate({{ t['id'] }})">Delete</button>
                     </div>
