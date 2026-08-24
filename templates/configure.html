@@ -48,6 +48,9 @@
             <img src="{{ url_for('static', filename='snapreport_logo.png') }}" alt="SnapReport" class="header-logo">
             <span class="header-brand">Snap<span>Report</span></span>
         </div>
+        <button class="hamburger" onclick="this.classList.toggle('active'); document.querySelector('.header-nav').classList.toggle('open');" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
         <nav class="header-nav">
             <a href="/templates">← Templates</a>
             <a href="/configure/{{ template['id'] }}/grading">Grading</a>
@@ -103,18 +106,18 @@
                         <tbody>
                             {% for field in fields %}
                             <tr>
-                                <td>{{ loop.index }}</td>
-                                <td class="field-name">{{ field['field_name'] }}</td>
-                                <td class="excel-col">{{ field['excel_column'] }}</td>
-                                <td class="field-type-badge">{{ field['field_type'] }}</td>
-                                <td>
+                                <td data-label="#">{{ loop.index }}</td>
+                                <td data-label="Field Name" class="field-name">{{ field['field_name'] }}</td>
+                                <td data-label="Excel Column" class="excel-col">{{ field['excel_column'] }}</td>
+                                <td data-label="Type" class="field-type-badge">{{ field['field_type'] }}</td>
+                                <td data-label="Grading">
                                     {% if field['include_in_grading'] %}
                                         <span class="badge badge-success">Included</span>
                                     {% else %}
                                         <span class="badge badge-neutral">No</span>
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td data-label="Actions">
                                     <div class="actions-cell">
                                         <button class="btn btn-ghost btn-sm" onclick="editField({{ field['id'] }})">Edit</button>
                                         <button class="btn btn-ghost btn-sm" style="color: var(--color-error);" onclick="deleteField({{ field['id'] }})">Delete</button>

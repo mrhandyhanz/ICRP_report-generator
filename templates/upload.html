@@ -26,6 +26,9 @@
             <img src="{{ url_for('static', filename='snapreport_logo.png') }}" alt="SnapReport" class="header-logo">
             <span class="header-brand">Snap<span>Report</span></span>
         </div>
+        <button class="hamburger" onclick="this.classList.toggle('active'); document.querySelector('.header-nav').classList.toggle('open');" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
         <nav class="header-nav">
             <a href="/configure/{{ template['id'] }}">← Back to Fields</a>
         </nav>
@@ -225,16 +228,16 @@
 
             data.students.forEach(student => {
                 const tr = document.createElement('tr');
-                let cells = `<td>${student._position}</td>`;
+                let cells = `<td data-label="#">${student._position}</td>`;
 
                 fieldNames.forEach(name => {
-                    cells += `<td>${student[name] || ''}</td>`;
+                    cells += `<td data-label="${name}">${student[name] || ''}</td>`;
                 });
 
-                cells += `<td><strong>${student._total}</strong></td>`;
-                cells += `<td><span class="badge badge-${student._grade.charAt(0) === 'N' ? 'neutral' : 'success'}">${student._grade}</span></td>`;
-                cells += `<td class="text-muted">${student._remark}</td>`;
-                cells += `<td>${student._position}</td>`;
+                cells += `<td data-label="Total"><strong>${student._total}</strong></td>`;
+                cells += `<td data-label="Grade"><span class="badge badge-${student._grade.charAt(0) === 'N' ? 'neutral' : 'success'}">${student._grade}</span></td>`;
+                cells += `<td data-label="Remark" class="text-muted">${student._remark}</td>`;
+                cells += `<td data-label="Position">${student._position}</td>`;
 
                 tr.innerHTML = cells;
                 tbody.appendChild(tr);
