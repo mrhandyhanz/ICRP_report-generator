@@ -1042,40 +1042,162 @@ h4 {
 
 
 /* =========================================================
-   CONFIGURE PAGE — FIELDS TABLE MOBILE
+   FIELD CARDS (Configure page)
    ========================================================= */
 
+.fields-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.field-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-5);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-fast);
+}
+
+.field-card:hover {
+    border-color: var(--color-primary-light);
+    box-shadow: var(--shadow-sm);
+}
+
+.field-card-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    flex: 1;
+    min-width: 0;
+}
+
+.field-card-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background: var(--color-surface-hover);
+    color: var(--color-text-secondary);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-bold);
+    flex-shrink: 0;
+}
+
+.field-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.field-card-name {
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.field-card-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.field-card-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: var(--weight-medium);
+    white-space: nowrap;
+}
+
+.pill-column {
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+}
+
+.pill-type {
+    background: var(--color-surface-hover);
+    color: var(--color-text-secondary);
+    text-transform: capitalize;
+}
+
+.pill-grading {
+    background: rgba(34, 197, 94, 0.08);
+    color: var(--color-success-dark);
+}
+
+.field-card-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-shrink: 0;
+    margin-left: var(--space-4);
+}
+
+.field-card-actions .btn-delete {
+    color: var(--color-error);
+}
+
+.field-card-actions .btn-delete:hover {
+    background: var(--color-error-light);
+}
+
+/* Mobile: compact field cards */
 @media (max-width: 768px) {
-    .fields-table thead {
-        display: none;
+    .field-card {
+        padding: var(--space-3) var(--space-4);
     }
 
-    .fields-table tbody tr {
-        display: flex;
+    .field-card-num {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+    }
+
+    .field-card-name {
+        font-size: var(--text-sm);
+    }
+
+    .field-card-actions {
+        margin-left: var(--space-3);
+    }
+
+    .field-card-actions .btn-sm {
+        padding: var(--space-1) var(--space-3);
+        min-height: 32px;
+        font-size: 11px;
+    }
+}
+
+/* Very small screens: stack actions below */
+@media (max-width: 380px) {
+    .field-card {
         flex-direction: column;
-        padding: var(--space-4);
-        border-bottom: 1px solid var(--color-border);
-        gap: var(--space-2);
+        align-items: flex-start;
+        gap: var(--space-3);
     }
 
-    .fields-table tbody td {
-        padding: var(--space-1) 0;
-        border-bottom: none;
+    .field-card-actions {
+        margin-left: 0;
+        width: 100%;
     }
 
-    .fields-table tbody td::before {
-        content: attr(data-label);
-        font-size: var(--text-xs);
-        font-weight: var(--weight-semibold);
-        color: var(--color-text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        display: block;
-        margin-bottom: 2px;
-    }
-
-    .actions-cell {
-        flex-direction: row;
+    .field-card-actions .btn {
+        flex: 1;
+        justify-content: center;
     }
 }
 
